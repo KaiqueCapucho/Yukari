@@ -1,10 +1,8 @@
-import os, sqlite3
-import subprocess
-import webbrowser
-import winreg
+import os, sqlite3, subprocess, webbrowser, winreg
+from typing import Any
 
 
-def create(bd='./bd.db'):
+def createBD(bd='./bd.db'):
     with sqlite3.connect(bd) as conn:
         conn.execute("""CREATE TABLE IF NOT EXISTS Sites(_id INTEGER PRIMARY KEY AUTOINCREMENT,
             key STRING NOT NULL, url STRING NOT NULL UNIQUE, private BOOLEAN NOT NULL)""")
@@ -13,25 +11,29 @@ def create(bd='./bd.db'):
         conn.execute("""CREATE TABLE IF NOT EXISTS Archives(_id INTEGER PRIMARY KEY AUTOINCREMENT,
             key STRING NOT NULL, dir STRING NOT NULL UNIQUE, notes String)""")
 
-def drop(bd='./bd.db'):
+def dropBD(bd='./bd.db'):
     if os.path.exists(bd):os.remove(bd)
     else: print(f"O arquivo {bd} não foi encontrado.")
 
 #Problema de SQL Injection no {table}
-def insertValue(table, key, value, data, bd='./bd.db' ):
+def insertValue(table:str, key:str, value:str, data:int, bd:str='./bd.db' ):
     with sqlite3.connect(bd) as conn:
         conn.execute(f"""INSERT INTO {table} VALUES (?, ?,?,?)""", (None, key, value, data))
 
 #Idem ao InsertValue
-def getKeys(table, bd='./bd.db'):
+def getKeys(table:str, bd:str='./bd.db')-> list[str]:
     with sqlite3.connect(bd) as conn:
-        return conn.execute(f"SELECT key FROM {table} ORDER BY key").fetchall()
+        return [k for (k,) in conn.execute(f"SELECT DISTINCT key FROM {table} ORDER BY key").fetchall()]
 
 #Idem ao getKeys
-def getValue(table, key, bd='./bd.db'):
+def getValue(table:str, key:str, bd:str='./bd.db')-> list[tuple[str, int]]:
     with sqlite3.connect(bd) as conn:
-        values = [row[2:3] for row in conn.execute(f"SELECT * FROM {table} WHERE key LIKE ?", key)]
-    return values[0],[1]
+        return [row[2:] for row in conn.execute(f"SELECT * FROM {table} WHERE key LIKE ?", (key,))]
+
+def getColumns(table:str, bd:str='./bd.db'):
+    with sqlite3.connect(bd) as conn:
+        return [c[1] for c in conn.execute(f'PRAGMA table_info({table});').fetchall()][1:]
+
 
 def obterNavegador():
     try:
@@ -52,8 +54,9 @@ def obterNavegador():
     except Exception as e:
         raise FileNotFoundError("Não foi possível encontrar o navegador padrão.") from e
 
-def openDir(values, arg=0):
-    for v in values:
+def openDir(values:list[tuple[str,int]]):
+    for value in values:
+        v, arg = value
         match v.split('.')[1]:
             case 'docx': subprocess.Popen(['C:\\Program Files (x86)\\Microsoft Office\\Office14\\WINWORD.exe', v])
             case 'xlsx': subprocess.Popen(['C:\\Program Files (x86)\\Microsoft Office\\Office14\\EXCEL.EXE', v])
@@ -70,6 +73,7 @@ def openDir(values, arg=0):
 
 #insertValue('Sites', 'chatgpt', 'https://chatgpt.com/', True)
 #insertValue('Sites', 'spotify', 'https://open.spotify.com/', False)
-
+#insertValue('Archives', 'latin', 'C:/Pendragon/Obenkyou/Idiomas/Latim/Dicionários/Dicionário do Latim Essencial.pdf', 0)
+#insertValue('Archives', 'latin', 'C:/Pendragon/Obenkyou/Idiomas/Latim/Gramatica Latina curso unico completo.pdf', 0)
 
 
