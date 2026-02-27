@@ -41,17 +41,14 @@ class TelaAdd(tk.Frame):
 
         # Botão Confirmar (sem comando/back-end)
         self.btnCancela = tk.Button(self.frame_botoes, text="Cancelar",
-                                    command= lambda: self.btnCancelar())
+                                    command= lambda: master.destroy())
         self.btnCancela.pack(side="left", padx=5)
 
         # Botão Cancelar (sem comando/back-end)
         self.btnConfirma = tk.Button(self.frame_botoes, text="Confirmar",
-                             command= lambda: self.btnConfirmar())
+                             command= lambda: self.btnConfirmar(master))
         self.btnConfirma.pack(side="left", padx=5)
 
-    def btnCancelar(self):
-        a = 1
-
-    def btnConfirmar(self):
+    def btnConfirmar(self, master):
         ran.insertValue(self.titulo, self.chave.get(), self.valor.get(), int(self.nota.get()) )
-        #fechar tela
+        master.destroy()
