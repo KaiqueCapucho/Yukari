@@ -1,33 +1,38 @@
 import tkinter as tk
 import ran_yakumo as ran
 from chen_yakumo import openTelaAdd
+from chen_yakumo import openTelaEdit
 from PIL import Image, ImageTk
-
 
 
 def createList(parent, titulo:str, keys:list[str]):
     frame = tk.LabelFrame(parent, text=titulo)
     container = tk.Frame(frame)
     container.pack(fill="both", expand=True)
+    icone = ImageTk.PhotoImage(Image.open('./img/edit_icon.png').resize((20,20)))
+    frame.icone = icone
     for key in keys:
-        tk.Button(container, text=key,
-           command=lambda t=titulo, k=key: btnListOnClick(parent,t,k)).pack(fill="x", pady=2)
-
-    tk.Button(container, text="+ Add", command=lambda:openTelaAdd(parent, titulo)
-              ).pack(fill="x", pady=5)
-    return frame
+        linha = tk.Frame(container)
+        linha.pack(fill="x", pady=2)
+    ##Botão principal
+        tk.Button(linha,text=key,command=lambda t=titulo, k=key: btnListOnClick(parent, t, k)
+        ).pack(side="left", fill="x", expand=True)
+    ##Botão de edit
+        tk.Button(linha, image=icone, command=lambda t=titulo, k=key: openTelaEdit(parent, f'Edit {titulo}')
+        ).pack(side="right", padx=5)
+    ##Botão de adição
+    tk.Button(container, text="+ Add", command=lambda: openTelaAdd(parent, titulo)).pack(fill="x", pady=5)
+    return  frame
 
 def btnListOnClick(parent:tk, table:str, key:str):
     ran.openDir(ran.getValue(table, key))
     parent.winfo_toplevel().destroy()
 
-######
 def btnTxtOnClick(master, txt):
     for t in txt.strip().splitlines():
         if t in ran.getKeys('Sites'):    ran.openDir(ran.getValue('Sites', t))
         if t in ran.getKeys('Apps'):     ran.openDir(ran.getValue('Apss', t))
         if t in ran.getKeys('Archives'): ran.openDir(ran.getValue('Archives', t))
-
     master.destroy()
 
 class App(tk.Tk):
@@ -40,7 +45,6 @@ class App(tk.Tk):
         self.geometry(f"{a}x{b}+{x}+{y}")
         self.telaP = TelaPrincipal(self)
         self.telaP.pack(fill='both', expand=True)
-
 
 
 #TelaPrincipal extends tk.Frame
@@ -72,6 +76,7 @@ class TelaPrincipal(tk.Frame):
 
         self.botaoTxt = tk.Button(self.frameTxt, text="Procurar", command=lambda: btnTxtOnClick(master, self.entrada.get("1.0",tk.END)))
         self.botaoTxt.pack(padx=5)
+        self.botaoTxt.bind("<Return>", lambda event: self.botaoTxt.invoke())
 
         # Carrega imagem
         #self.img = ImageTk.PhotoImage(Image.open("img/yukarin.jpg").resize((600, 400)))

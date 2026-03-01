@@ -7,8 +7,11 @@ def openTelaAdd(self, titulo):
     newWindow.geometry("300x350")
     TelaAdd(newWindow, titulo)
 
-
-
+def openTelaEdit(self, titulo):
+    newWindow = tk.Toplevel(self.master)
+    newWindow.title("Tela de Edição/Remoção")
+    newWindow.geometry("300x350")
+    TelaEdit(newWindow, titulo)
 class TelaAdd(tk.Frame):
     def __init__(self, master, titulo):
         super().__init__(master)
@@ -52,3 +55,14 @@ class TelaAdd(tk.Frame):
     def btnConfirmar(self, master):
         ran.insertValue(self.titulo, self.chave.get(), self.valor.get(), int(self.nota.get()) )
         master.destroy()
+
+class TelaEdit(tk.Frame):
+    def __init__(self, master, titulo):
+        super().__init__(master)
+        self.pack(padx=20, pady=20)
+
+        # Título opcional
+        self.title = tk.Label(self, text="Adicionar Dados", font=("Arial", 14))
+        self.title.pack(pady=10)
+        self.titulo = titulo
+        key, value, note = ran.getColumns(titulo)
